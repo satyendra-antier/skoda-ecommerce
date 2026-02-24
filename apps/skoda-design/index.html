@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skoda Storefront</title>
+    <meta name="description" content="Skoda Storefront" />
+    <meta name="author" content="Skoda" />
+
+    <meta property="og:title" content="Skoda Storefront" />
+    <meta property="og:description" content="Skoda Storefront" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/opengraph-image.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@SkodaAuto" />
+    <meta name="twitter:image" content="/opengraph-image.png" />
+  </head>
+
+  <body>
+    <script>
+      (function() {
+        var t = localStorage.getItem('theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.classList.add(t);
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

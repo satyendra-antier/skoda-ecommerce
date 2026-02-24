@@ -1,0 +1,89 @@
+# Full stack: run with: docker compose up --build -d
+# Storefront (skoda-design): http://localhost:8080
+# Admin panel (skoda-admin): http://localhost:8081
+# API: http://localhost:4000
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: skoda-api
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_PATH=/app/data/skoda.db
+      - CORS_ORIGIN=http://localhost:8080,http://127.0.0.1:8080,http://localhost:8081,http://127.0.0.1:8081
+      - FRONTEND_URL=http://localhost:8080
+      - API_BASE_URL=http://localhost:4000
+      - JWT_SECRET=skoda-admin-secret-change-in-production
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_USE_SSL=false
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=skoda-products
+      - MINIO_PUBLIC_URL=http://localhost:9000/skoda-products
+    depends_on:
+      minio:
+        condition: service_started
+    volumes:
+      - api-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:4000/health', (r) => { r.resume(); process.exit(r.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  minio:
+    image: minio/minio:latest
+    container_name: skoda-minio
+    command: server /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  # Storefront (public shop) — port 8080
+  web:
+    build:
+      context: ./apps/skoda-design
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:4000
+    container_name: skoda-web
+    ports:
+      - "8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Admin panel — port 8081
+  admin:
+    build:
+      context: ./apps/skoda-admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:4000
+    container_name: skoda-admin
+    ports:
+      - "8081:8081"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  api-data:
+  minio-data:

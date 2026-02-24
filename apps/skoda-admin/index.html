@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SKODA Admin</title>
+  </head>
+  <body>
+    <script>
+      (function() {
+        var t = localStorage.getItem('theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.classList.add(t);
+      })();
+    </script>
+    <div id="root">
+      <p style="padding: 2rem; text-align: center; color: #666;">Loading…</p>
+    </div>
+    <noscript>
+      <p style="padding: 2rem; text-align: center;">SKODA Admin requires JavaScript.</p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
